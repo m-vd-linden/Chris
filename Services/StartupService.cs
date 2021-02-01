@@ -29,7 +29,7 @@ namespace Chris.Services
 
         public async Task StartAsync()
         {
-            string token = _config["tokens:Pietoe"];
+            string token = _config["tokens:Chris"];
 
             if (string.IsNullOrWhiteSpace(token))
                 throw new Exception("Token incorrect");

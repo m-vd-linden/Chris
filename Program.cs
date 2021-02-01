@@ -25,17 +25,16 @@ namespace Chris
                 .AddYamlFile("_config.yml");
             Configuration = builder.Build();
 
-            using (var services = ConfigureServices())
-            {
-                var client = services.GetRequiredService<DiscordSocketClient>();
+            var provider = ConfigureServices();
 
-                client.Log += LogAsync;
+            var client = provider.GetRequiredService<DiscordSocketClient>();
 
-                await services.GetRequiredService<StartupService>().StartAsync();
-                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+            client.Log += LogAsync;
 
-                await Task.Delay(Timeout.Infinite);
-            }
+            await provider.GetRequiredService<StartupService>().StartAsync();
+            await provider.GetRequiredService<CommandHandlingService>().InitializeAsync();
+
+            await Task.Delay(Timeout.Infinite);
         }
 
         private Task LogAsync(LogMessage log)
@@ -48,7 +47,15 @@ namespace Chris
         private ServiceProvider ConfigureServices()
         {
             return new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
+                {
+                    LogLevel = LogSeverity.Verbose,
+                    MessageCacheSize = 1000,
+                    GatewayIntents =
+                            GatewayIntents.Guilds |
+                            GatewayIntents.GuildPresences |
+                            GatewayIntents.GuildMembers
+                }))
                 .AddSingleton<CommandService>()
                 .AddSingleton<StartupService>()
                 .AddSingleton<CommandHandlingService>()
