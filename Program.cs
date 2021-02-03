@@ -25,15 +25,15 @@ namespace Chris
                 .AddYamlFile("_config.yml");
             Configuration = builder.Build();
 
-            var provider = ConfigureServices();
+            using (var services = ConfigureServices())
+            {
+                var client = services.GetRequiredService<DiscordSocketClient>();
 
-            var client = provider.GetRequiredService<DiscordSocketClient>();
+                client.Log += LogAsync;
 
-            client.Log += LogAsync;
-
-            await provider.GetRequiredService<StartupService>().StartAsync();
-            await provider.GetRequiredService<CommandHandlingService>().InitializeAsync();
-
+                await services.GetRequiredService<StartupService>().StartAsync();
+                await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+            }
             await Task.Delay(Timeout.Infinite);
         }
 
@@ -54,7 +54,7 @@ namespace Chris
                     GatewayIntents =
                             GatewayIntents.Guilds |
                             GatewayIntents.GuildPresences |
-                            GatewayIntents.GuildMembers
+                            GatewayIntents.GuildMembers | GatewayIntents.GuildMessages
                 }))
                 .AddSingleton<CommandService>()
                 .AddSingleton<StartupService>()

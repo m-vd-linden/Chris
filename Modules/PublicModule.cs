@@ -28,5 +28,10 @@ namespace Chris.Modules
         [RequireOwner]
         public Task EchoAsync([Remainder] string text)
             => ReplyAsync('\u200B' + text);
+
+        [Command("Beroerd")]
+        [RequireOwner]
+        public Task Beroerd()
+            => ReplyAsync("Nee jonge, je bent zelf beroerd!");
     }
 }
